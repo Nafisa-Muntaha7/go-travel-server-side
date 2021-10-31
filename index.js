@@ -2,6 +2,7 @@ const express = require('express');
 const { MongoClient } = require('mongodb');
 require('dotenv').config();
 const cors = require('cors');
+const ObjectId = require('mongodb').ObjectId;
 
 const app = express();
 const port = process.env.PORT || 7000;
@@ -18,11 +19,28 @@ async function run() {
         await client.connect();
         const database = client.db('travel_Agent');
         const tourCollection = database.collection('tours');
+        const bookingCollection = database.collection('bookings');
 
         app.get('/tours', async (req, res) => {
             const cursor = tourCollection.find({});
             const tours = await cursor.toArray();
             res.send(tours);
+        })
+
+
+        app.get('/bookings', async (req, res) => {
+            const cursor = bookingCollection.find({});
+            const bookings = await cursor.toArray();
+            res.send(bookings);
+        })
+
+
+        app.delete('/tours/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await tourCollection.deleteOne(query);
+            console.log('Count', result)
+            res.json(result)
         })
 
     }
@@ -39,7 +57,4 @@ app.get('/', (req, res) => {
 
 app.listen(port, () => {
     console.log('Server Running.....')
-})
-
-//go-travel
-//gvMkDajwdMW48hxh
+});
